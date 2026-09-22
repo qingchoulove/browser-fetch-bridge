@@ -31,76 +31,126 @@ them from `adapters/index.js` in this checkout, or from the directory named by
 `BROWSER_BRIDGE_ADAPTERS_DIR`. Without an adapter tree the bridge still starts,
 `doctor` works, and `adapter list` is empty.
 
-## Requirements
+## Installation
 
-- Node.js 18 or newer.
-- Chrome 120 or newer, so reconnect alarms can wake a suspended extension
-  service worker.
+Three parts have to agree on one loopback address and token:
 
-## Install
+| Part | Source | Runs as |
+| --- | --- | --- |
+| CLI `browser-fetch-bridge` | `cli/` | a global command in any shell |
+| Server (the daemon) | `server/service.js` | a loopback process |
+| Chrome extension | `extension/` | an unpacked extension in Chrome |
+
+### 1. Clone and install dependencies
 
 ```bash
+git clone https://github.com/qingchoulove/browser-fetch-bridge.git
+cd browser-fetch-bridge
 npm install
+```
+
+Keep this checkout in place: Chrome loads `extension/` from it, and the CLI
+loads endpoint adapters from `<checkout>/adapters` unless
+`BROWSER_BRIDGE_ADAPTERS_DIR` points elsewhere.
+
+### 2. Install the CLI globally
+
+```bash
 npm link
 ```
 
-`npm link` installs the executable declared in `package.json`, so commands need
-no explicit `node ...` prefix:
+`npm link` puts `browser-fetch-bridge` on your `PATH` and keeps it pointed at
+this checkout, so CLI edits and the local adapter tree apply immediately.
+`npm install -g .` is the explicit equivalent: on npm 7 and newer a local
+directory install is a symlink to the checkout, so both behave the same.
+
+Install a detached copy when you want a frozen snapshot with nothing to keep
+around:
 
 ```bash
-browser-fetch-bridge doctor
-browser-fetch-bridge adapter list
+npm install -g . --install-links
 ```
 
-Configuration comes from the environment:
+That copy has no adapter tree — the published package deliberately excludes it —
+so set `BROWSER_BRIDGE_ADAPTERS_DIR` to your adapters, and keep a checkout
+anyway for the Chrome extension folder.
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `BROWSER_BRIDGE_HOST` | `127.0.0.1` | Daemon bind host. |
-| `BROWSER_BRIDGE_PORT` | `37891` | Daemon port; also names the PID file. |
-| `BROWSER_BRIDGE_TOKEN` | `browser-fetch-bridge-dev` | Local daemon token, asserted by the extension hello. |
-| `BROWSER_BRIDGE_TIMEOUT_MS` | `30000` | Readiness wait, including daemon startup. |
-| `BROWSER_BRIDGE_STATE_DIR` | `~/.browser-fetch-bridge` | PID, log, trace, and mutation-authorization state. |
-| `BROWSER_BRIDGE_ADAPTERS_DIR` | `<repo>/adapters` | Adapter tree containing `index.js`. |
-| `BROWSER_BRIDGE_AUTOSTART` | `1` | `0` disables first-use daemon startup. |
-
-## Daemon
-
-The CLI starts a detached local daemon on first use, so Docker and a terminal
-running `npm start` are not required. PID and logs live under
-`~/.browser-fetch-bridge/`.
+Confirm the command resolves:
 
 ```bash
-browser-fetch-bridge daemon status
+which browser-fetch-bridge
+browser-fetch-bridge status
+```
+
+### 3. Start the server
+
+The CLI starts a detached local daemon on demand, so the only required step is
+using the CLI. Manage the server explicitly when you want to:
+
+```bash
 browser-fetch-bridge daemon start
+browser-fetch-bridge daemon status
 browser-fetch-bridge daemon restart
 browser-fetch-bridge daemon stop
 ```
 
-`stop` only terminates a PID recorded by this CLI and confirmed by the live
-daemon. `server/Dockerfile` is an optional deployment artifact, not a runtime
+To keep the server in the foreground instead, run the same entry point the CLI
+spawns:
+
+```bash
+npm start            # or: node server/service.js
+```
+
+Stop a foreground server with Ctrl-C, and never run a foreground server and a
+managed daemon on the same port. The daemon listens only on loopback and answers
+only with the configured token; `status` reports whether the server is running
+and whether the extension is connected.
+
+PID and log files live in the state directory (`~/.browser-fetch-bridge/` by
+default) as `daemon-<port>.pid` and `daemon-<port>.log`. `stop` only terminates
+a PID recorded by this CLI and confirmed by the live daemon. Set
+`BROWSER_BRIDGE_AUTOSTART=0` to disable on-demand startup.
+
+`server/Dockerfile` is an optional deployment artifact, not a runtime
 dependency.
 
-## Chrome Extension
+### 4. Load the Chrome extension
 
 1. Open `chrome://extensions`.
 2. Enable Developer mode.
 3. Choose **Load unpacked** and select this repository's `extension/` folder.
 4. After upgrading, click **Reload** once to activate the updated extension
    code.
-5. Verify:
+
+Chrome loads the extension from that folder, so moving or deleting the checkout
+breaks it. The extension dials
+`ws://127.0.0.1:37891/?token=browser-fetch-bridge-dev` verbatim: if you override
+`BROWSER_BRIDGE_PORT` or `BROWSER_BRIDGE_TOKEN`, edit `BRIDGE_URL` in
+`extension/background.js` and reload the extension to match.
+
+### 5. Verify the installation
 
 ```bash
 browser-fetch-bridge doctor
 ```
 
 `doctor` waits for the extension connection and `hello`, then checks daemon
-connectivity, protocol version, and advertised capabilities. The v2 extension
-advertises `fetch.text`, `fetch.json`, `fetch.base64`, and
-`fetch.started-ack`. `status` and `daemon status` are immediate snapshots and do
-not wait.
+connectivity, protocol version, and advertised capabilities; it exits non-zero
+when a check fails. The v2 extension advertises `fetch.text`, `fetch.json`,
+`fetch.base64`, and `fetch.started-ack`. The popup shows the same connection
+state and offers a manual reconnect, while `status` and `daemon status` stay
+immediate snapshots that do not wait.
 
-### Automatic connection recovery
+A registered adapter tree is visible separately:
+
+```bash
+browser-fetch-bridge adapter list
+```
+
+An empty list means no adapter tree was found at `adapters/` or
+`BROWSER_BRIDGE_ADAPTERS_DIR`; the bridge itself is still healthy.
+
+## Connection Recovery
 
 The extension retries every 1.5 seconds after a disconnect, and a 30-second
 Chrome alarm wakes a suspended MV3 worker. Connection attempts stuck in
@@ -115,6 +165,20 @@ or launches Chrome. A live adapter reports `extension_disconnected` or
 capability. If Chrome is closed or the extension is disabled, open Chrome or
 enable the extension; the popup's reconnect button stays available for an
 explicit reset.
+
+## Configuration
+
+Configuration comes from the environment:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `BROWSER_BRIDGE_HOST` | `127.0.0.1` | Daemon bind host. |
+| `BROWSER_BRIDGE_PORT` | `37891` | Daemon port; also names the PID file. |
+| `BROWSER_BRIDGE_TOKEN` | `browser-fetch-bridge-dev` | Local daemon token, asserted by the extension hello. |
+| `BROWSER_BRIDGE_TIMEOUT_MS` | `30000` | Readiness wait, including daemon startup. |
+| `BROWSER_BRIDGE_STATE_DIR` | `~/.browser-fetch-bridge` | PID, log, trace, and mutation-authorization state. |
+| `BROWSER_BRIDGE_ADAPTERS_DIR` | `adapters/` beside the installed CLI | Adapter tree containing `index.js`. |
+| `BROWSER_BRIDGE_AUTOSTART` | `1` | `0` disables first-use daemon startup. |
 
 ## Adapter CLI
 
