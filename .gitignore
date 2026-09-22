@@ -16,7 +16,6 @@
 !/test/daemon.test.js
 !/test/extension-popup.test.js
 !/test/proxy-connection-state.test.js
-!/test/server-dockerfile.test.js
 
 # Docs: only the generic tool standard is published. Internal design records
 # stay local.

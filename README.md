@@ -111,9 +111,6 @@ default) as `daemon-<port>.pid` and `daemon-<port>.log`. `stop` only terminates
 a PID recorded by this CLI and confirmed by the live daemon. Set
 `BROWSER_BRIDGE_AUTOSTART=0` to disable on-demand startup.
 
-`server/Dockerfile` is an optional deployment artifact, not a runtime
-dependency.
-
 ### 4. Load the Chrome extension
 
 1. Open `chrome://extensions`.
