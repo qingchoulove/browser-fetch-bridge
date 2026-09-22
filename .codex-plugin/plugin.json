@@ -1,0 +1,22 @@
+{
+  "name": "browser-fetch-bridge",
+  "version": "0.2.0+codex.20260827082131",
+  "description": "API-first endpoint adapters through an authenticated Chrome bridge.",
+  "author": {
+    "name": "Local developer"
+  },
+  "interface": {
+    "displayName": "Browser Fetch Bridge",
+    "shortDescription": "Run registered APIs through a local Chrome bridge.",
+    "longDescription": "Browser Fetch Bridge exposes registered endpoint adapters through one local CLI and detached daemon. The Chrome extension supplies authenticated fetch context. Workflow Skills are installed separately in the user's ~/.agents/skills directory.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Call a registered API through my logged-in Chrome session"
+    ]
+  }
+}

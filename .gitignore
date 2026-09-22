@@ -1,0 +1,35 @@
+# The published tree is the generic bridge: CLI, daemon, Chrome extension, and
+# the adapter runtime. Everything not explicitly allowlisted here is local-only.
+
+# Endpoint adapters encode site-specific and organization-specific contracts.
+# They stay on this machine, or in a separate private repository, and are loaded
+# from `adapters/` or from the directory named by BROWSER_BRIDGE_ADAPTERS_DIR.
+/adapters/
+
+# Tests: only adapter-independent suites are published. A new test file stays
+# local until it is allowlisted here.
+/test/*
+!/test/adapter-registry.test.js
+!/test/background-proxy-controls.test.js
+!/test/browser-bridge-service.test.js
+!/test/cli.test.js
+!/test/daemon.test.js
+!/test/extension-popup.test.js
+!/test/proxy-connection-state.test.js
+!/test/server-dockerfile.test.js
+
+# Docs: only the generic tool standard is published. Internal design records
+# stay local.
+/docs/*
+!/docs/design/
+/docs/design/*
+!/docs/design/agent-tool-standard.md
+
+# Local vocabulary notes and generated reports.
+/CONTEXT.md
+/logs/
+/outputs/
+
+# Dependencies and OS artifacts.
+/node_modules/
+.DS_Store

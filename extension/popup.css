@@ -1,0 +1,156 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #303030;
+  background: #ffffff;
+}
+
+body {
+  margin: 0;
+  min-width: 360px;
+  background: #ffffff;
+}
+
+.popup {
+  box-sizing: border-box;
+  width: 360px;
+  padding: 24px 16px 14px;
+  background: #ffffff;
+}
+
+.brand {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.codex-mark {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: #2f2f2f;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.7;
+}
+
+h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.status-card {
+  box-sizing: border-box;
+  min-height: 64px;
+  padding: 11px 14px 12px;
+  border: 1px solid #e4e4e4;
+  border-radius: 10px;
+  background: #fbfbfb;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02);
+}
+
+.status-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 230px;
+  min-height: 24px;
+  padding: 0 14px;
+  border: 1px solid #ccefd8;
+  border-radius: 999px;
+  color: #008a3d;
+  background: #eaf8ef;
+  font-size: 14px;
+  font-weight: 520;
+  line-height: 1;
+}
+
+.status-pill.connecting {
+  color: #8a5a00;
+  border-color: #f3dfac;
+  background: #fff5d8;
+}
+
+.status-pill.disconnected {
+  color: #b42318;
+  border-color: #f5c8c2;
+  background: #fff0ee;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
+.icon-button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: #6a6a6a;
+  background: transparent;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: #f0f0f0;
+}
+
+.icon-button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.icon-button svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.version,
+.error-message {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.version {
+  color: #666666;
+}
+
+.error-message {
+  margin-top: 10px;
+  color: #8f221c;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

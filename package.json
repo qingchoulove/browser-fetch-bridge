@@ -1,0 +1,20 @@
+{
+  "name": "browser-fetch-bridge",
+  "version": "0.2.0",
+  "private": true,
+  "type": "commonjs",
+  "bin": {
+    "browser-fetch-bridge": "./cli/browser-fetch-bridge.js"
+  },
+  "scripts": {
+    "start": "node server/service.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ws": "^8.21.0"
+  }
+}
